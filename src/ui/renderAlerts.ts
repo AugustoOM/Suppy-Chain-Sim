@@ -16,12 +16,22 @@ const alertLabel = (type: Alert["type"]): string => {
   return "Info";
 };
 
+const alertIcon = (type: Alert["type"]): string => {
+  if (type === "critical") {
+    return "circle-alert";
+  }
+  if (type === "warning") {
+    return "triangle-alert";
+  }
+  return "info";
+};
+
 export const renderAlerts = (state: SimulationState): string => `
   <aside class="alerts-panel">
     <div class="panel-header">
       <div>
         <p class="eyebrow">Monitoreo</p>
-        <h2>Alertas</h2>
+        <h2><i data-lucide="bell"></i>Alertas</h2>
       </div>
       <span class="alert-counter">${state.alerts.length}</span>
     </div>
@@ -30,7 +40,7 @@ export const renderAlerts = (state: SimulationState): string => `
         ? state.alerts.map((alert) => `
           <article class="alert-card ${alert.type}">
             <div>
-              <span>${alertLabel(alert.type)}</span>
+              <span><i data-lucide="${alertIcon(alert.type)}"></i>${alertLabel(alert.type)}</span>
               <time>${formatAlertTime(alert.timestamp)}</time>
             </div>
             <p>${alert.message}</p>

@@ -12,12 +12,14 @@ const materialOptions = (materials: Material[]): string =>
 const resourceOptions = (resources: Resource[]): string =>
   resources.map((resource) => `<option value="${resource.id}">${resource.name}</option>`).join("");
 
+const icon = (name: string): string => `<i data-lucide="${name}"></i>`;
+
 const renderProductTable = (products: Product[]): string => `
   <div class="table-wrap">
     <table>
       <thead>
         <tr>
-          <th>Producto</th>
+          <th>Receta</th>
           <th>Demanda/h</th>
           <th>Objetivo</th>
         </tr>
@@ -40,7 +42,7 @@ const renderMaterialTable = (materials: Material[]): string => `
     <table>
       <thead>
         <tr>
-          <th>Material</th>
+          <th>Ingrediente</th>
           <th>Stock</th>
           <th>Reposición</th>
         </tr>
@@ -63,7 +65,7 @@ const renderResourceTable = (resources: Resource[]): string => `
     <table>
       <thead>
         <tr>
-          <th>Recurso</th>
+          <th>Estación</th>
           <th>Capacidad/h</th>
           <th>Cola max.</th>
         </tr>
@@ -86,22 +88,22 @@ export const renderConfigPanel = (state: SimulationState): string => `
     <div class="panel-header">
       <div>
         <p class="eyebrow">Configuración</p>
-        <h2>Escenario productivo</h2>
+        <h2>Obrador de scones</h2>
       </div>
       <span class="status-pill ${state.isRunning ? "status-running" : "status-paused"}">
-        ${state.isRunning ? "En marcha" : "Pausado"}
+        ${icon(state.isRunning ? "play" : "pause")}${state.isRunning ? "En marcha" : "Pausado"}
       </span>
     </div>
 
     <div class="control-grid">
-      <button id="load-demo" class="button secondary" type="button">Demo</button>
-      <button id="save-scenario" class="button secondary" type="button">Guardar</button>
-      <button id="load-scenario" class="button secondary" type="button">Cargar</button>
-      <button id="export-results" class="button secondary" type="button">Exportar</button>
-      <button id="start-simulation" class="button success" type="button">Iniciar</button>
-      <button id="pause-simulation" class="button warning" type="button">Pausar</button>
-      <button id="reset-simulation" class="button danger" type="button">Reiniciar</button>
-      <button id="reset-demo" class="button secondary" type="button">Reset demo</button>
+      <button id="load-demo" class="button secondary" type="button">${icon("cookie")}Demo</button>
+      <button id="save-scenario" class="button secondary" type="button">${icon("save")}Guardar</button>
+      <button id="load-scenario" class="button secondary" type="button">${icon("folder-open")}Cargar</button>
+      <button id="export-results" class="button secondary" type="button">${icon("download")}Exportar</button>
+      <button id="start-simulation" class="button success" type="button">${icon("play")}Iniciar</button>
+      <button id="pause-simulation" class="button warning" type="button">${icon("pause")}Pausar</button>
+      <button id="reset-simulation" class="button danger" type="button">${icon("rotate-ccw")}Reiniciar</button>
+      <button id="reset-demo" class="button secondary" type="button">${icon("refresh-cw")}Reset demo</button>
     </div>
 
     <label class="field full">
@@ -114,11 +116,11 @@ export const renderConfigPanel = (state: SimulationState): string => `
     </label>
 
     <section class="config-section">
-      <h3>Agregar producto</h3>
+      <h3>${icon("chef-hat")}Agregar receta</h3>
       <form id="product-form" class="form-grid">
         <label class="field">
           <span>Nombre</span>
-          <input name="name" required placeholder="Ej. Estantería" />
+          <input name="name" required placeholder="Ej. Scone de queso" />
         </label>
         <label class="field">
           <span>Demanda por hora</span>
@@ -128,17 +130,17 @@ export const renderConfigPanel = (state: SimulationState): string => `
           <span>Objetivo</span>
           <input name="targetProduction" type="number" min="1" step="1" required />
         </label>
-        <button class="button primary" type="submit">Agregar producto</button>
+        <button class="button primary" type="submit">${icon("plus")}Agregar receta</button>
       </form>
       ${renderProductTable(state.products)}
     </section>
 
     <section class="config-section">
-      <h3>Agregar material</h3>
+      <h3>${icon("wheat")}Agregar ingrediente</h3>
       <form id="material-form" class="form-grid">
         <label class="field">
           <span>Nombre</span>
-          <input name="name" required placeholder="Ej. Herrajes" />
+          <input name="name" required placeholder="Ej. Queso rallado" />
         </label>
         <label class="field">
           <span>Unidad</span>
@@ -152,17 +154,17 @@ export const renderConfigPanel = (state: SimulationState): string => `
           <span>Punto de reposición</span>
           <input name="reorderPoint" type="number" min="0" step="0.1" required />
         </label>
-        <button class="button primary" type="submit">Agregar material</button>
+        <button class="button primary" type="submit">${icon("plus")}Agregar ingrediente</button>
       </form>
       ${renderMaterialTable(state.materials)}
     </section>
 
     <section class="config-section">
-      <h3>Agregar recurso</h3>
+      <h3>${icon("factory")}Agregar estación</h3>
       <form id="resource-form" class="form-grid">
         <label class="field">
           <span>Nombre</span>
-          <input name="name" required placeholder="Ej. Embalaje" />
+          <input name="name" required placeholder="Ej. Laminado" />
         </label>
         <label class="field">
           <span>Capacidad por hora</span>
@@ -172,43 +174,43 @@ export const renderConfigPanel = (state: SimulationState): string => `
           <span>Cola máxima</span>
           <input name="maxQueue" type="number" min="1" step="1" required />
         </label>
-        <button class="button primary" type="submit">Agregar recurso</button>
+        <button class="button primary" type="submit">${icon("plus")}Agregar estación</button>
       </form>
       ${renderResourceTable(state.resources)}
     </section>
 
     <section class="config-section">
-      <h3>Conectar cadena</h3>
+      <h3>${icon("workflow")}Conectar proceso</h3>
       <form id="bom-form" class="form-grid">
         <label class="field">
-          <span>Producto</span>
+          <span>Receta</span>
           <select name="productId" required>${productOptions(state.products)}</select>
         </label>
         <label class="field">
-          <span>Material</span>
+          <span>Ingrediente</span>
           <select name="materialId" required>${materialOptions(state.materials)}</select>
         </label>
         <label class="field">
           <span>Cantidad por unidad</span>
           <input name="quantityPerUnit" type="number" min="0.01" step="0.01" required />
         </label>
-        <button class="button primary" type="submit">Agregar material</button>
+        <button class="button primary" type="submit">${icon("link")}Agregar ingrediente</button>
       </form>
 
       <form id="route-form" class="form-grid">
         <label class="field">
-          <span>Producto</span>
+          <span>Receta</span>
           <select name="productId" required>${productOptions(state.products)}</select>
         </label>
         <label class="field">
-          <span>Recurso</span>
+          <span>Estación</span>
           <select name="resourceId" required>${resourceOptions(state.resources)}</select>
         </label>
         <label class="field">
           <span>Minutos de proceso</span>
           <input name="processTimeMinutes" type="number" min="0.1" step="0.1" required />
         </label>
-        <button class="button primary" type="submit">Agregar etapa</button>
+        <button class="button primary" type="submit">${icon("list-plus")}Agregar etapa</button>
       </form>
     </section>
   </aside>

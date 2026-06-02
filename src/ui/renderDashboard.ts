@@ -15,6 +15,8 @@ const getProductName = (products: Product[], productId: string): string =>
 const getResourceName = (resources: Resource[], resourceId: string | null): string =>
   resources.find((resource) => resource.id === resourceId)?.name ?? "Sin datos";
 
+const icon = (name: string): string => `<i data-lucide="${name}"></i>`;
+
 const inventoryStatus = (material: Material): string => {
   if (material.currentStock <= 0) {
     return "critical";
@@ -28,31 +30,31 @@ const inventoryStatus = (material: Material): string => {
 const renderMetricCards = (state: SimulationState): string => `
   <section class="metrics-grid">
     <article class="metric-card">
-      <span>Tiempo simulado</span>
+      <span>${icon("timer")}Tiempo simulado</span>
       <strong>${formatTime(state.simulatedMinutes)}</strong>
     </article>
     <article class="metric-card">
-      <span>Producción total</span>
+      <span>${icon("cookie")}Scones terminados</span>
       <strong>${formatNumber(state.metrics.totalCompletedUnits)}</strong>
     </article>
     <article class="metric-card">
-      <span>Cumplimiento demanda</span>
+      <span>${icon("target")}Cumplimiento demanda</span>
       <strong>${formatNumber(state.metrics.demandFulfillmentPercentage)}%</strong>
     </article>
     <article class="metric-card">
-      <span>Cuello de botella</span>
+      <span>${icon("flame")}Cuello de botella</span>
       <strong>${getResourceName(state.resources, state.metrics.bottleneckResourceId)}</strong>
     </article>
     <article class="metric-card">
-      <span>Utilización promedio</span>
+      <span>${icon("gauge")}Utilización promedio</span>
       <strong>${formatNumber(state.metrics.averageResourceUtilization)}%</strong>
     </article>
     <article class="metric-card">
-      <span>Alertas activas</span>
+      <span>${icon("bell")}Alertas activas</span>
       <strong>${state.alerts.length}</strong>
     </article>
     <article class="metric-card">
-      <span>Pérdida estimada</span>
+      <span>${icon("triangle-alert")}Merma estimada</span>
       <strong>${formatNumber(state.metrics.estimatedLostProduction)}</strong>
     </article>
   </section>
@@ -61,8 +63,8 @@ const renderMetricCards = (state: SimulationState): string => `
 const renderInventory = (state: SimulationState): string => `
   <section class="dashboard-section">
     <div class="section-heading">
-      <h2>Inventario</h2>
-      <span>Materiales restantes y consumidos</span>
+      <h2>${icon("wheat")}Ingredientes</h2>
+      <span>Stock restante y consumo por receta</span>
     </div>
     <div class="inventory-list">
       ${state.materials.map((material) => {
@@ -99,8 +101,8 @@ const utilizationClass = (utilization: number): string => {
 const renderResources = (state: SimulationState): string => `
   <section class="dashboard-section">
     <div class="section-heading">
-      <h2>Recursos</h2>
-      <span>Utilización y colas de producción</span>
+      <h2>${icon("factory")}Estaciones</h2>
+      <span>Utilización y colas del obrador</span>
     </div>
     <div class="resource-list">
       ${state.resources.map((resource) => {
@@ -131,8 +133,8 @@ const renderResources = (state: SimulationState): string => `
 const renderCompletedByProduct = (state: SimulationState): string => `
   <section class="dashboard-section">
     <div class="section-heading">
-      <h2>Producción completada</h2>
-      <span>Unidades terminadas por producto</span>
+      <h2>${icon("clipboard-check")}Lotes completados</h2>
+      <span>Scones terminados por receta</span>
     </div>
     <div class="product-output-grid">
       ${Object.entries(state.completedUnitsByProduct).map(([productId, units]) => `
@@ -148,8 +150,8 @@ const renderCompletedByProduct = (state: SimulationState): string => `
 const renderProductionFlow = (state: SimulationState): string => `
   <section class="dashboard-section flow-section">
     <div class="section-heading">
-      <h2>Flujo de producción</h2>
-      <span>Ruta horizontal de cada producto</span>
+      <h2>${icon("workflow")}Flujo de producción</h2>
+      <span>Pesado, mezclado, horneado y empaque por receta</span>
     </div>
     <div class="flow-list">
       ${state.products.map((product) => `
@@ -164,7 +166,7 @@ const renderProductionFlow = (state: SimulationState): string => `
                 </span>
                 ${index < product.route.length - 1 ? "<i></i>" : ""}
               `).join("")
-              : `<span class="flow-node empty">Sin ruta</span>`}
+              : `<span class="flow-node empty">Sin proceso</span>`}
           </div>
         </article>
       `).join("")}

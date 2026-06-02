@@ -29,7 +29,7 @@ export const createInitialState = (scenario: ScenarioData = demoScenario): Simul
       {
         id: createId("info"),
         type: "info",
-        message: "Escenario listo para simular.",
+        message: "Obrador listo para simular la producción de scones.",
         timestamp: 0
       }
     ],

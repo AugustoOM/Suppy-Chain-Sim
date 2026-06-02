@@ -1,3 +1,31 @@
+import {
+  Bell,
+  ChefHat,
+  CircleAlert,
+  ClipboardCheck,
+  Cookie,
+  createIcons,
+  Download,
+  Factory,
+  Flame,
+  FolderOpen,
+  Gauge,
+  Info,
+  Link,
+  ListPlus,
+  Pause,
+  Play,
+  Plus,
+  RefreshCw,
+  RotateCcw,
+  Save,
+  Target,
+  Timer,
+  TriangleAlert,
+  Wheat,
+  Workflow
+} from "lucide";
+import logoUrl from "../../Logo-nutriscone.jpeg";
 import { demoScenario } from "../data/demoScenario";
 import type { Alert, Material, Product, Resource, ScenarioData, SimulationState } from "../models/types";
 import { loadScenario, resetSimulation, runSimulationTick } from "../simulation/simulationEngine";
@@ -29,6 +57,43 @@ const formValue = (form: HTMLFormElement, name: string): string => {
 const numericFormValue = (form: HTMLFormElement, name: string): number =>
   Number(formValue(form, name));
 
+const lucideIcons = {
+  Bell,
+  ChefHat,
+  CircleAlert,
+  ClipboardCheck,
+  Cookie,
+  Download,
+  Factory,
+  Flame,
+  FolderOpen,
+  Gauge,
+  Info,
+  Link,
+  ListPlus,
+  Pause,
+  Play,
+  Plus,
+  RefreshCw,
+  RotateCcw,
+  Save,
+  Target,
+  Timer,
+  TriangleAlert,
+  Wheat,
+  Workflow
+};
+
+const refreshIcons = (): void => {
+  createIcons({
+    icons: lucideIcons,
+    attrs: {
+      "aria-hidden": "true",
+      "stroke-width": "2.2"
+    }
+  });
+};
+
 const addSystemAlert = (
   state: SimulationState,
   type: Alert["type"],
@@ -37,7 +102,7 @@ const addSystemAlert = (
   ...state,
   alerts: [
     {
-      id: createId("alerta"),
+    id: createId("alerta"),
       type,
       message,
       timestamp: state.simulatedMinutes
@@ -73,7 +138,7 @@ const addProduct = (state: SimulationState, form: HTMLFormElement): SimulationSt
       products: [...state.products, product]
     }),
     "info",
-    `${product.name} agregado al escenario.`
+    `${product.name} agregado al plan de producción.`
   );
 };
 
@@ -94,7 +159,7 @@ const addMaterial = (state: SimulationState, form: HTMLFormElement): SimulationS
       materials: [...state.materials, material]
     }),
     "info",
-    `${material.name} agregado al inventario.`
+    `${material.name} agregado al inventario de ingredientes.`
   );
 };
 
@@ -115,7 +180,7 @@ const addResource = (state: SimulationState, form: HTMLFormElement): SimulationS
       resources: [...state.resources, resource]
     }),
     "info",
-    `${resource.name} agregado como recurso productivo.`
+    `${resource.name} agregado como estación del obrador.`
   );
 };
 
@@ -138,7 +203,7 @@ const connectMaterial = (state: SimulationState, form: HTMLFormElement): Simulat
   return addSystemAlert(
     resetWithScenario(state, { ...scenarioFromState(state), products }),
     "info",
-    "Material conectado al producto."
+    "Ingrediente conectado a la receta."
   );
 };
 
@@ -156,7 +221,7 @@ const connectResource = (state: SimulationState, form: HTMLFormElement): Simulat
   return addSystemAlert(
     resetWithScenario(state, { ...scenarioFromState(state), products }),
     "info",
-    "Etapa agregada a la ruta del producto."
+    "Etapa agregada al proceso de la receta."
   );
 };
 
@@ -225,19 +290,19 @@ export const renderApp = (root: HTMLElement): void => {
 
     root.querySelector<HTMLButtonElement>("#save-scenario")?.addEventListener("click", () => {
       saveScenarioToLocalStorage(state);
-      setState(addSystemAlert(state, "info", "Escenario guardado en el navegador."));
+      setState(addSystemAlert(state, "info", "Plan del obrador guardado en el navegador."));
     });
 
     root.querySelector<HTMLButtonElement>("#load-scenario")?.addEventListener("click", () => {
       const savedScenario = loadScenarioFromLocalStorage();
       setState(savedScenario
-        ? addSystemAlert({ ...loadScenario(savedScenario), speed: state.speed }, "info", "Escenario cargado desde el navegador.")
-        : addSystemAlert(state, "warning", "No hay un escenario guardado."));
+        ? addSystemAlert({ ...loadScenario(savedScenario), speed: state.speed }, "info", "Plan del obrador cargado desde el navegador.")
+        : addSystemAlert(state, "warning", "No hay un plan guardado."));
     });
 
     root.querySelector<HTMLButtonElement>("#export-results")?.addEventListener("click", () => {
       exportResultsAsJson(state);
-      setState(addSystemAlert(state, "info", "Resultados exportados como JSON."));
+      setState(addSystemAlert(state, "info", "Resultados del obrador exportados como JSON."));
     });
 
     root.querySelector<HTMLSelectElement>("#speed-selector")?.addEventListener("change", (event) => {
@@ -256,14 +321,17 @@ export const renderApp = (root: HTMLElement): void => {
     root.innerHTML = `
       <div class="app-shell">
         <header class="app-header">
-          <div>
-            <p class="eyebrow">Simulador industrial</p>
-            <h1>Cadena de Producción</h1>
+          <div class="brand-lockup">
+            <img src="${logoUrl}" alt="Nutriscone" />
+            <div>
+              <p class="eyebrow">Simulador de producción alimentaria</p>
+              <h1>Producción de Scones</h1>
+            </div>
           </div>
           <div class="header-summary">
-            <span>${state.products.length} productos</span>
-            <span>${state.materials.length} materiales</span>
-            <span>${state.resources.length} recursos</span>
+            <span><i data-lucide="chef-hat"></i>${state.products.length} recetas</span>
+            <span><i data-lucide="wheat"></i>${state.materials.length} ingredientes</span>
+            <span><i data-lucide="factory"></i>${state.resources.length} estaciones</span>
           </div>
         </header>
         <div class="workspace">
@@ -274,6 +342,7 @@ export const renderApp = (root: HTMLElement): void => {
       </div>
     `;
     bindActions();
+    refreshIcons();
   }
 
   render();
