@@ -1,4 +1,5 @@
 import {
+  Activity,
   Bell,
   ChefHat,
   CircleAlert,
@@ -19,6 +20,7 @@ import {
   RefreshCw,
   RotateCcw,
   Save,
+  Settings,
   Target,
   Timer,
   TriangleAlert,
@@ -57,7 +59,10 @@ const formValue = (form: HTMLFormElement, name: string): string => {
 const numericFormValue = (form: HTMLFormElement, name: string): number =>
   Number(formValue(form, name));
 
+type AppView = "configuration" | "execution";
+
 const lucideIcons = {
+  Activity,
   Bell,
   ChefHat,
   CircleAlert,
@@ -77,12 +82,15 @@ const lucideIcons = {
   RefreshCw,
   RotateCcw,
   Save,
+  Settings,
   Target,
   Timer,
   TriangleAlert,
   Wheat,
   Workflow
 };
+
+const icon = (name: string): string => `<i data-lucide="${name}"></i>`;
 
 const refreshIcons = (): void => {
   createIcons({
@@ -227,6 +235,7 @@ const connectResource = (state: SimulationState, form: HTMLFormElement): Simulat
 
 export const renderApp = (root: HTMLElement): void => {
   let state = loadScenario(demoScenario);
+  let activeView: AppView = "configuration";
   let timerId: number | null = null;
 
   const stopTimer = (): void => {
@@ -268,6 +277,16 @@ export const renderApp = (root: HTMLElement): void => {
   };
 
   const bindActions = (): void => {
+    root.querySelector<HTMLButtonElement>("#view-configuration")?.addEventListener("click", () => {
+      activeView = "configuration";
+      render();
+    });
+
+    root.querySelector<HTMLButtonElement>("#view-execution")?.addEventListener("click", () => {
+      activeView = "execution";
+      render();
+    });
+
     root.querySelector<HTMLButtonElement>("#load-demo")?.addEventListener("click", () => {
       setState({ ...loadScenario(demoScenario), speed: state.speed });
     });
@@ -277,6 +296,7 @@ export const renderApp = (root: HTMLElement): void => {
     });
 
     root.querySelector<HTMLButtonElement>("#start-simulation")?.addEventListener("click", () => {
+      activeView = "execution";
       setState({ ...state, isRunning: true });
     });
 
@@ -317,6 +337,75 @@ export const renderApp = (root: HTMLElement): void => {
     handleForm("route-form", connectResource);
   };
 
+  const renderViewNavigation = (): string => `
+    <nav class="view-tabs" aria-label="Secciones del simulador">
+      <button
+        id="view-configuration"
+        class="view-tab ${activeView === "configuration" ? "active" : ""}"
+        type="button"
+        aria-current="${activeView === "configuration" ? "page" : "false"}"
+      >
+        ${icon("settings")}Configuración
+      </button>
+      <button
+        id="view-execution"
+        class="view-tab ${activeView === "execution" ? "active" : ""}"
+        type="button"
+        aria-current="${activeView === "execution" ? "page" : "false"}"
+      >
+        ${icon("activity")}Ejecución
+      </button>
+    </nav>
+  `;
+
+  const renderExecutionControls = (): string => `
+    <section class="execution-controls">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Ejecución</p>
+          <h2>${icon("workflow")}Proceso de producción</h2>
+        </div>
+        <span class="status-pill ${state.isRunning ? "status-running" : "status-paused"}">
+          ${icon(state.isRunning ? "play" : "pause")}${state.isRunning ? "En marcha" : "Pausado"}
+        </span>
+      </div>
+      <div class="control-grid execution-grid">
+        <button id="start-simulation" class="button success" type="button">${icon("play")}Iniciar</button>
+        <button id="pause-simulation" class="button warning" type="button">${icon("pause")}Pausar</button>
+        <button id="reset-simulation" class="button danger" type="button">${icon("rotate-ccw")}Reiniciar</button>
+        <button id="export-results" class="button secondary" type="button">${icon("download")}Exportar</button>
+      </div>
+      <label class="field speed-field">
+        <span>Velocidad</span>
+        <select id="speed-selector">
+          ${[1, 5, 10, 30].map((speed) => `
+            <option value="${speed}" ${state.speed === speed ? "selected" : ""}>${speed}x</option>
+          `).join("")}
+        </select>
+      </label>
+    </section>
+  `;
+
+  const renderCurrentView = (): string => {
+    if (activeView === "configuration") {
+      return `
+        <div class="config-page">
+          ${renderConfigPanel(state)}
+        </div>
+      `;
+    }
+
+    return `
+      <div class="execution-page">
+        <div class="execution-main">
+          ${renderExecutionControls()}
+          ${renderDashboard(state)}
+        </div>
+        ${renderAlerts(state)}
+      </div>
+    `;
+  };
+
   function render(): void {
     root.innerHTML = `
       <div class="app-shell">
@@ -334,11 +423,8 @@ export const renderApp = (root: HTMLElement): void => {
             <span><i data-lucide="factory"></i>${state.resources.length} estaciones</span>
           </div>
         </header>
-        <div class="workspace">
-          ${renderConfigPanel(state)}
-          ${renderDashboard(state)}
-          ${renderAlerts(state)}
-        </div>
+        ${renderViewNavigation()}
+        ${renderCurrentView()}
       </div>
     `;
     bindActions();

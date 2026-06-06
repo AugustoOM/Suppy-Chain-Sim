@@ -90,30 +90,14 @@ export const renderConfigPanel = (state: SimulationState): string => `
         <p class="eyebrow">Configuración</p>
         <h2>Obrador de scones</h2>
       </div>
-      <span class="status-pill ${state.isRunning ? "status-running" : "status-paused"}">
-        ${icon(state.isRunning ? "play" : "pause")}${state.isRunning ? "En marcha" : "Pausado"}
-      </span>
     </div>
 
-    <div class="control-grid">
-      <button id="load-demo" class="button secondary" type="button">${icon("cookie")}Demo</button>
+    <div class="config-actions">
+      <button id="load-demo" class="button secondary" type="button">${icon("cookie")}Cargar demo</button>
       <button id="save-scenario" class="button secondary" type="button">${icon("save")}Guardar</button>
       <button id="load-scenario" class="button secondary" type="button">${icon("folder-open")}Cargar</button>
-      <button id="export-results" class="button secondary" type="button">${icon("download")}Exportar</button>
-      <button id="start-simulation" class="button success" type="button">${icon("play")}Iniciar</button>
-      <button id="pause-simulation" class="button warning" type="button">${icon("pause")}Pausar</button>
-      <button id="reset-simulation" class="button danger" type="button">${icon("rotate-ccw")}Reiniciar</button>
       <button id="reset-demo" class="button secondary" type="button">${icon("refresh-cw")}Reset demo</button>
     </div>
-
-    <label class="field full">
-      <span>Velocidad</span>
-      <select id="speed-selector">
-        ${[1, 5, 10, 30].map((speed) => `
-          <option value="${speed}" ${state.speed === speed ? "selected" : ""}>${speed}x</option>
-        `).join("")}
-      </select>
-    </label>
 
     <section class="config-section">
       <h3>${icon("chef-hat")}Agregar receta</h3>
