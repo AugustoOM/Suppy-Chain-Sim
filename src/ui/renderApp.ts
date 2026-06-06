@@ -1,6 +1,7 @@
 import {
   Activity,
   Bell,
+  Boxes,
   ChefHat,
   CircleAlert,
   ClipboardCheck,
@@ -41,6 +42,7 @@ import {
   saveScenarioToLocalStorage
 } from "../storage/localStorageService";
 import { renderAlerts } from "./renderAlerts";
+import { render3DLine } from "./render3DLine";
 import { renderConfigPanel, type RouteStepEdit } from "./renderConfigPanel";
 import { renderDashboard } from "./renderDashboard";
 
@@ -62,11 +64,12 @@ const formValue = (form: HTMLFormElement, name: string): string => {
 const numericFormValue = (form: HTMLFormElement, name: string): number =>
   Number(formValue(form, name));
 
-type AppView = "configuration" | "execution";
+type AppView = "configuration" | "execution" | "line3d";
 
 const lucideIcons = {
   Activity,
   Bell,
+  Boxes,
   ChefHat,
   CircleAlert,
   ClipboardCheck,
@@ -298,6 +301,7 @@ const reorderRouteStep = (
 export const renderApp = (root: HTMLElement): void => {
   let state = loadScenario(demoScenario);
   let activeView: AppView = "configuration";
+  let selected3DProductId: string | null = null;
   let editingRouteStep: RouteStepEdit | null = null;
   let draggedRouteStep: RouteStepEdit | null = null;
   let timerId: number | null = null;
@@ -351,6 +355,11 @@ export const renderApp = (root: HTMLElement): void => {
       render();
     });
 
+    root.querySelector<HTMLButtonElement>("#view-line3d")?.addEventListener("click", () => {
+      activeView = "line3d";
+      render();
+    });
+
     root.querySelector<HTMLButtonElement>("#load-demo")?.addEventListener("click", () => {
       setState({ ...loadScenario(demoScenario), speed: state.speed });
     });
@@ -392,6 +401,11 @@ export const renderApp = (root: HTMLElement): void => {
     root.querySelector<HTMLSelectElement>("#speed-selector")?.addEventListener("change", (event) => {
       const speed = Number((event.currentTarget as HTMLSelectElement).value);
       setState({ ...state, speed });
+    });
+
+    root.querySelector<HTMLSelectElement>("#product-3d-selector")?.addEventListener("change", (event) => {
+      selected3DProductId = (event.currentTarget as HTMLSelectElement).value;
+      render();
     });
 
     handleForm("product-form", addProduct);
@@ -472,6 +486,14 @@ export const renderApp = (root: HTMLElement): void => {
       >
         ${icon("activity")}Ejecución
       </button>
+      <button
+        id="view-line3d"
+        class="view-tab ${activeView === "line3d" ? "active" : ""}"
+        type="button"
+        aria-current="${activeView === "line3d" ? "page" : "false"}"
+      >
+        ${icon("boxes")}3D Línea
+      </button>
     </nav>
   `;
 
@@ -510,6 +532,10 @@ export const renderApp = (root: HTMLElement): void => {
           ${renderConfigPanel(state, editingRouteStep)}
         </div>
       `;
+    }
+
+    if (activeView === "line3d") {
+      return render3DLine(state, selected3DProductId);
     }
 
     return `
