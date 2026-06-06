@@ -600,6 +600,125 @@ tr:last-child td {
   background: #fffdf7;
 }
 
+.flow-config-section {
+  padding-bottom: 0;
+}
+
+.config-flow-list {
+  display: grid;
+  gap: 12px;
+}
+
+.config-flow-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 210px) minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffdf7;
+}
+
+.config-flow-row > strong {
+  color: var(--accent-dark);
+}
+
+.config-flow-line {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 8px;
+}
+
+.config-flow-node {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 2px 8px;
+  align-items: center;
+  min-width: 150px;
+  min-height: 64px;
+  border: 1px solid var(--sage);
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  padding: 8px;
+  text-align: left;
+  font-weight: 850;
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.config-flow-node:hover,
+.config-flow-node.editing {
+  border-color: var(--accent);
+  box-shadow: 0 8px 22px rgba(226, 134, 74, 0.22);
+  transform: translateY(-1px);
+}
+
+.config-flow-node svg {
+  grid-row: 1 / 3;
+  color: var(--text-muted);
+  cursor: grab;
+}
+
+.config-flow-node:active svg {
+  cursor: grabbing;
+}
+
+.config-flow-node small {
+  color: var(--text-muted);
+  font-weight: 750;
+}
+
+.config-flow-empty,
+.flow-hint {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.config-flow-empty {
+  display: inline-flex;
+  align-items: center;
+  min-height: 54px;
+  padding: 8px 10px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+}
+
+.flow-hint {
+  margin: 12px 0 0;
+}
+
+.route-edit-form {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(180px, 1fr) minmax(140px, 0.7fr) auto auto;
+  gap: 10px;
+  align-items: end;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-muted);
+}
+
+.route-edit-form > div {
+  display: grid;
+  gap: 2px;
+  align-self: center;
+}
+
+.route-edit-form > div strong {
+  color: var(--accent-dark);
+}
+
+.route-edit-form > div span {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
 .flow-line {
   display: flex;
   align-items: center;
@@ -797,6 +916,8 @@ tr:last-child td {
   .config-actions,
   .execution-grid,
   .form-grid,
+  .config-flow-row,
+  .route-edit-form,
   .metrics-grid,
   .product-output-grid,
   .alerts-list,

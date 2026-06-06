@@ -5,12 +5,14 @@ import {
   CircleAlert,
   ClipboardCheck,
   Cookie,
+  Check,
   createIcons,
   Download,
   Factory,
   Flame,
   FolderOpen,
   Gauge,
+  GripVertical,
   Info,
   Link,
   ListPlus,
@@ -25,7 +27,8 @@ import {
   Timer,
   TriangleAlert,
   Wheat,
-  Workflow
+  Workflow,
+  X
 } from "lucide";
 import logoUrl from "../../Logo-nutriscone.jpeg";
 import { demoScenario } from "../data/demoScenario";
@@ -38,7 +41,7 @@ import {
   saveScenarioToLocalStorage
 } from "../storage/localStorageService";
 import { renderAlerts } from "./renderAlerts";
-import { renderConfigPanel } from "./renderConfigPanel";
+import { renderConfigPanel, type RouteStepEdit } from "./renderConfigPanel";
 import { renderDashboard } from "./renderDashboard";
 
 const createId = (name: string): string => {
@@ -68,11 +71,13 @@ const lucideIcons = {
   CircleAlert,
   ClipboardCheck,
   Cookie,
+  Check,
   Download,
   Factory,
   Flame,
   FolderOpen,
   Gauge,
+  GripVertical,
   Info,
   Link,
   ListPlus,
@@ -87,7 +92,8 @@ const lucideIcons = {
   Timer,
   TriangleAlert,
   Wheat,
-  Workflow
+  Workflow,
+  X
 };
 
 const icon = (name: string): string => `<i data-lucide="${name}"></i>`;
@@ -233,9 +239,67 @@ const connectResource = (state: SimulationState, form: HTMLFormElement): Simulat
   );
 };
 
+const updateRouteStep = (state: SimulationState, form: HTMLFormElement): SimulationState => {
+  const productId = formValue(form, "productId");
+  const stepIndex = numericFormValue(form, "stepIndex");
+  const resourceId = formValue(form, "resourceId");
+  const processTimeMinutes = numericFormValue(form, "processTimeMinutes");
+  const products = state.products.map((product) => {
+    if (product.id !== productId) {
+      return product;
+    }
+
+    return {
+      ...product,
+      route: product.route.map((step, index) => index === stepIndex
+        ? { ...step, resourceId, processTimeMinutes }
+        : step)
+    };
+  });
+
+  return addSystemAlert(
+    resetWithScenario(state, { ...scenarioFromState(state), products }),
+    "info",
+    "Etapa del flujo actualizada."
+  );
+};
+
+const reorderRouteStep = (
+  state: SimulationState,
+  productId: string,
+  fromIndex: number,
+  toIndex: number
+): SimulationState => {
+  if (fromIndex === toIndex) {
+    return state;
+  }
+
+  const products = state.products.map((product) => {
+    if (product.id !== productId) {
+      return product;
+    }
+
+    const route = [...product.route];
+    const [movedStep] = route.splice(fromIndex, 1);
+    if (!movedStep) {
+      return product;
+    }
+    route.splice(toIndex, 0, movedStep);
+    return { ...product, route };
+  });
+
+  return addSystemAlert(
+    resetWithScenario(state, { ...scenarioFromState(state), products }),
+    "info",
+    "Flujo de producción reordenado."
+  );
+};
+
 export const renderApp = (root: HTMLElement): void => {
   let state = loadScenario(demoScenario);
   let activeView: AppView = "configuration";
+  let editingRouteStep: RouteStepEdit | null = null;
+  let draggedRouteStep: RouteStepEdit | null = null;
   let timerId: number | null = null;
 
   const stopTimer = (): void => {
@@ -335,6 +399,59 @@ export const renderApp = (root: HTMLElement): void => {
     handleForm("resource-form", addResource);
     handleForm("bom-form", connectMaterial);
     handleForm("route-form", connectResource);
+
+    const editForm = root.querySelector<HTMLFormElement>("#route-edit-form");
+    editForm?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      editingRouteStep = null;
+      setState(updateRouteStep(state, editForm));
+    });
+
+    root.querySelector<HTMLButtonElement>("#cancel-route-edit")?.addEventListener("click", () => {
+      editingRouteStep = null;
+      render();
+    });
+
+    root.querySelectorAll<HTMLButtonElement>(".config-flow-node").forEach((node) => {
+      node.addEventListener("click", () => {
+        editingRouteStep = {
+          productId: node.dataset.productId ?? "",
+          stepIndex: Number(node.dataset.stepIndex)
+        };
+        render();
+      });
+
+      node.addEventListener("dragstart", (event) => {
+        draggedRouteStep = {
+          productId: node.dataset.productId ?? "",
+          stepIndex: Number(node.dataset.stepIndex)
+        };
+        event.dataTransfer?.setData("text/plain", JSON.stringify(draggedRouteStep));
+        event.dataTransfer?.setDragImage(node, 16, 16);
+      });
+
+      node.addEventListener("dragover", (event) => {
+        event.preventDefault();
+      });
+
+      node.addEventListener("drop", (event) => {
+        event.preventDefault();
+        const targetProductId = node.dataset.productId ?? "";
+        const targetStepIndex = Number(node.dataset.stepIndex);
+        if (!draggedRouteStep || draggedRouteStep.productId !== targetProductId) {
+          return;
+        }
+
+        const moved = draggedRouteStep;
+        draggedRouteStep = null;
+        editingRouteStep = { productId: targetProductId, stepIndex: targetStepIndex };
+        setState(reorderRouteStep(state, targetProductId, moved.stepIndex, targetStepIndex));
+      });
+
+      node.addEventListener("dragend", () => {
+        draggedRouteStep = null;
+      });
+    });
   };
 
   const renderViewNavigation = (): string => `
@@ -390,7 +507,7 @@ export const renderApp = (root: HTMLElement): void => {
     if (activeView === "configuration") {
       return `
         <div class="config-page">
-          ${renderConfigPanel(state)}
+          ${renderConfigPanel(state, editingRouteStep)}
         </div>
       `;
     }
